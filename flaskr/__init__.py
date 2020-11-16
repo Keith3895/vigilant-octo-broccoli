@@ -13,13 +13,14 @@ def create_app(test_config=None):
     if test_config is None:
         app.config.from_pyfile('config.py', silent=True)
     else:
-        app.config.from_mapping(test_config)
+        app.config.from_pyfile(test_config, silent=True)
     try:
         os.makedirs(app.instance_path)
     except OSError:
         pass
     db.init_app(app)
-
+    from . import auth
+    app.register_blueprint(auth.bp)
     @app.route('/hello')
     def hello():
         # from . import models
@@ -27,9 +28,9 @@ def create_app(test_config=None):
         #                     username='keith', email='emailTemp')
         from sqlalchemy import Table, MetaData
 
-        users = Table('users', MetaData(bind=db.get_db()), autoload=True)
+        # users = Table('users', MetaData(bind=db.get_db()), autoload=True)
 
-        db.get_db().execute(users.insert(), id=2, username='admin', email='admin@localhost')
+        # db.get_db().execute(users.insert(), id=2, username='admin', email='admin@localhost')
         userInfo = db.get_db().execute('select * from users').first()
         print(userInfo)
         return 'Hello, World!'
