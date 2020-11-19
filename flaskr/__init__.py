@@ -18,7 +18,9 @@ def create_app(test_config=None):
         os.makedirs(app.instance_path)
     except OSError:
         pass
+    app.secret_key = 'any random string'
     db.init_app(app)
+
     from . import auth
     app.register_blueprint(auth.bp)
     @app.route('/hello')
