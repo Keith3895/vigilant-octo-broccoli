@@ -1,6 +1,6 @@
 import pytest
 
-from flaskr import create_app
+from identity_server import create_app
 
 
 @pytest.fixture

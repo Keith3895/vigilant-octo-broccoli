@@ -1,6 +1,6 @@
 import functools
 from flask import session, current_app, Blueprint, g, redirect, session, url_for, request, make_response, jsonify
-from flaskr.db import get_db
+from identity_server.db import get_db
 from requests_oauthlib import OAuth2Session
 bp = Blueprint('auth', __name__, url_prefix='/auth')
 

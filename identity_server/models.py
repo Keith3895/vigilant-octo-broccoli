@@ -1,5 +1,5 @@
 from flask import g
-from flaskr.db import get_db
+from identity_server.db import get_db
 
 db = get_db()
 
