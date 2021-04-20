@@ -29,6 +29,7 @@ def gcp_login_callback():
         session['token'] = oauth.fetch_token('https://accounts.google.com/o/oauth2/token',
                                              authorization_response=authorization_response,
                                              client_secret=client_secret)
+        print(session)
         return redirect(session['redirect_uri'])
 
 @bp.route('/token')

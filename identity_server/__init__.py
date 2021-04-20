@@ -1,10 +1,27 @@
 import os
+import logging
+from logging.handlers import RotatingFileHandler
 
 from flask import Flask
 from . import db
 
+def setLogger():
+    path = os.path.join(os.getcwd(),'logs')
+    try: 
+        os.mkdir(path) 
+    except OSError as error: 
+        print(error)   
+    LOGGER = logging.getLogger("")
+    LOGFILE_NAME = 'logs/app.log'
+    hdlr = RotatingFileHandler(LOGFILE_NAME, maxBytes=2000, backupCount=10)
+    base_formatter = logging.Formatter(
+        "%(asctime)s %(name)s:%(levelname)s %(message)s")
+    hdlr.setFormatter(base_formatter)
+    LOGGER.addHandler(hdlr)
+    LOGGER.setLevel(logging.DEBUG)
 
 def create_app(test_config=None):
+    setLogger()
     app = Flask(__name__, instance_relative_config=True)
     # app.config.from_mapping(
     #     SECRET_KEY='dev',
@@ -21,7 +38,7 @@ def create_app(test_config=None):
     app.secret_key = 'any random string'
     db.init_app(app)
 
-    from . import auth
+    from identity_server.provider import auth
     app.register_blueprint(auth.bp)
     @app.route('/hello')
     def hello():
