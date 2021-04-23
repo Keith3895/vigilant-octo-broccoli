@@ -21,7 +21,7 @@ export FLASK_APP=identity_server
 ```
 flask run
 ```
-4) optional 
+4) optional for dev only.
 ```
 export AUTHLIB_INSECURE_TRANSPORT=true
 ```
