@@ -21,3 +21,5 @@ export FLASK_APP=identity_server
 ```
 flask run
 ```
+
+export AUTHLIB_INSECURE_TRANSPORT=true

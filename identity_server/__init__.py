@@ -3,7 +3,7 @@ import logging
 from logging.handlers import RotatingFileHandler
 
 from flask import Flask
-from . import db
+from .models import db
 
 def setLogger():
     path = os.path.join(os.getcwd(),'logs')
@@ -36,23 +36,31 @@ def create_app(test_config=None):
     except OSError:
         pass
     app.secret_key = 'any random string'
+    
+    @app.before_first_request
+    def create_tables():
+        db.create_all()
     db.init_app(app)
+    from .provider import oauth2, routes
+    oauth2.config_oauth(app)
+    app.register_blueprint(routes.bp)
 
-    from identity_server.provider import auth
-    app.register_blueprint(auth.bp)
+
+    # from .clients import auth
+    # app.register_blueprint(auth.bp)
     @app.route('/hello')
     def hello():
         # from . import models
         # db.get_db().execute('INSERT INTO users ("id", "username", "email") VALUES (:id, :username, :email)', id=1,
         #                     username='keith', email='emailTemp')
-        from sqlalchemy import Table, MetaData
-        import json
-        # users = Table('users', MetaData(bind=db.get_db()), autoload=True)
+        # from sqlalchemy import Table, MetaData
+        # import json
+        # # users = Table('users', MetaData(bind=db.get_db()), autoload=True)
 
-        # db.get_db().execute(users.insert(), id=4, username='admin2', email='admin2@localhost')
-        userInfo = db.get_db().execute('select * from users')
-        print(userInfo)
-        # return 'Hello, World!'
-        return json.dumps([dict(r) for r in userInfo])
+        # # db.get_db().execute(users.insert(), id=4, username='admin2', email='admin2@localhost')
+        # userInfo = db.get_db().execute('select * from users')
+        # print(userInfo)
+        return 'Hello, World!'
+        # return json.dumps([dict(r) for r in userInfo])
 
     return app
