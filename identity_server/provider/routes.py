@@ -6,8 +6,8 @@ from authlib.integrations.flask_oauth2 import current_token
 from authlib.oauth2 import OAuth2Error
 from identity_server.models import db, User, OAuth2Client
 from .oauth2 import authorization, require_oauth
-
-
+from identity_server.utils import AlchemyEncoder
+import json
 bp = Blueprint(__name__, 'home')
 
 
@@ -22,28 +22,29 @@ def split_by_crlf(s):
     return [v for v in s.splitlines() if v]
 
 
-@bp.route('/', methods=('GET', 'POST'))
-def home():
-    if request.method == 'POST':
-        username = request.form.get('username')
-        user = User.query.filter_by(username=username).first()
-        if not user:
-            user = User(username=username)
-            db.session.add(user)
-            db.session.commit()
-        session['id'] = user.id
-        # if user is not just to log in, but need to head back to the auth page, then go for it
-        next_page = request.args.get('next')
-        if next_page:
-            return redirect(next_page)
-        return redirect('/')
-    user = current_user()
-    if user:
-        clients = OAuth2Client.query.filter_by(user_id=user.id).all()
-    else:
-        clients = []
+# @bp.route('/', methods=('GET', 'POST'))
+# def home():
+#     if request.method == 'POST':
+#         username = request.form.get('username')
+#         user = User.query.filter_by(username=username).first()
+#         # compare hashes
+#         if not user:
+#             user = User(username=username)
+#             db.session.add(user)
+#             db.session.commit()
+#         session['id'] = user.id
+#         # if user is not just to log in, but need to head back to the auth page, then go for it
+#         next_page = request.args.get('next')
+#         if next_page:
+#             return redirect(next_page)
+#         return redirect('/')
+#     user = current_user()
+#     if user:
+#         clients = OAuth2Client.query.filter_by(user_id=user.id).all()
+#     else:
+#         clients = []
 
-    return render_template('home.html', user=user, clients=clients)
+#     return render_template('home.html', user=user, clients=clients)
 
 
 @bp.route('/logout')
@@ -127,4 +128,49 @@ def revoke_token():
 def api_me():
     user = current_token.user
     return jsonify(id=user.id, username=user.username)
+
+
+@bp.route('/oauth/register', methods=['POST'])
+def register():
+    if request.method == 'POST':
+        user_request = request.get_json()
+        user = User.query.filter_by(username=user_request['email']).first()
+        if not user:
+            user = User(
+                username=user_request['email'],
+                email=user_request['email'],
+                first_name=user_request['first_name'],
+                last_name=user_request['last_name'],
+                full_name=user_request['full_name'] if user_request['full_name'] is not None else user_request['first_name'] +
+                " "+user_request['last_name']
+            )
+            user.set_password(user_request['password'])
+            db.session.add(user)
+            db.session.commit()
+        # Change this to a success message.
+        return jsonify(user=user.email), 200
+
+
+@bp.route('/oauth/login', methods=['POST'])
+def login():
+    if(request.method == 'GET'):
+        user = current_user()
+        if user:
+            clients = OAuth2Client.query.filter_by(user_id=user.id).all()
+        else:
+            clients = []
+        return render_template('home.html', user=user, clients=clients)
+
     
+    user_request = request.get_json()
+    user = User.query.filter_by(username=user_request['email']).first()
+    # compare hashes
+    if not user or not user.check_password(user_request['password']):
+        return jsonify(message="fail"), 403
+    else:
+        session['id'] = user.id
+        next_page = request.args.get('next')
+        if next_page:
+            return redirect(next_page)
+        # return redirect('/')
+        return jsonify(message="success"), 200
