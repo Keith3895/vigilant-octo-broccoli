@@ -136,19 +136,22 @@ def register():
         user_request = request.get_json()
         user = User.query.filter_by(username=user_request['email']).first()
         if not user:
+            if 'full_name' in user_request:
+                full_name = user_request['full_name']
+            else:
+                full_name = user_request['first_name'] +" "+user_request['last_name']
             user = User(
                 username=user_request['email'],
                 email=user_request['email'],
                 first_name=user_request['first_name'],
                 last_name=user_request['last_name'],
-                full_name=user_request['full_name'] if user_request['full_name'] is not None else user_request['first_name'] +
-                " "+user_request['last_name']
+                full_name=full_name
             )
             user.set_password(user_request['password'])
             db.session.add(user)
             db.session.commit()
         # Change this to a success message.
-        return jsonify(user=user.email), 200
+        return jsonify(user=user.email), 201
 
 
 @bp.route('/oauth/login', methods=['POST'])
@@ -173,4 +176,4 @@ def login():
         if next_page:
             return redirect(next_page)
         # return redirect('/')
-        return jsonify(message="success"), 200
+        return jsonify(message="success"), 201

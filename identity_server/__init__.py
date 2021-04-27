@@ -50,17 +50,7 @@ def create_app(test_config=None):
     # app.register_blueprint(auth.bp)
     @app.route('/hello')
     def hello():
-        # from . import models
-        # db.get_db().execute('INSERT INTO users ("id", "username", "email") VALUES (:id, :username, :email)', id=1,
-        #                     username='keith', email='emailTemp')
-        # from sqlalchemy import Table, MetaData
-        # import json
-        # # users = Table('users', MetaData(bind=db.get_db()), autoload=True)
-
-        # # db.get_db().execute(users.insert(), id=4, username='admin2', email='admin2@localhost')
-        # userInfo = db.get_db().execute('select * from users')
-        # print(userInfo)
         return 'Hello, World!'
-        # return json.dumps([dict(r) for r in userInfo])
+        
 
     return app
