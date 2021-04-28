@@ -46,8 +46,9 @@ def create_app(test_config=None):
     app.register_blueprint(routes.bp)
 
 
-    # from .clients import auth
-    # app.register_blueprint(auth.bp)
+    from .clients import gcp,linkedin
+    app.register_blueprint(gcp.bp)
+    app.register_blueprint(linkedin.bp)
     @app.route('/hello')
     def hello():
         return 'Hello, World!'

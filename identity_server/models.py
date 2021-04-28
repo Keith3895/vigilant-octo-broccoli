@@ -18,7 +18,7 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(120), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
-    password_hash = db.Column(db.String(128), unique=True, nullable=False)
+    password_hash = db.Column(db.String(128), unique=True)
     full_name = db.Column(db.String(128))
     first_name = db.Column(db.String(128))
     last_name = db.Column(db.String(128))
@@ -61,6 +61,7 @@ class OAuth2Token(db.Model, OAuth2TokenMixin):
     __tablename__ = 'oauth2_token'
 
     id = db.Column(db.Integer, primary_key=True)
+    access_token = db.Column(db.String(400), unique=True, nullable=False)
     user_id = db.Column(
         db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'))
     user = db.relationship('User')
