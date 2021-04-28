@@ -18,15 +18,11 @@ def setLogger():
         "%(asctime)s %(name)s:%(levelname)s %(message)s")
     hdlr.setFormatter(base_formatter)
     LOGGER.addHandler(hdlr)
-    LOGGER.setLevel(logging.DEBUG)
+    LOGGER.setLevel(logging.ERROR)
 
 def create_app(test_config=None):
     setLogger()
     app = Flask(__name__, instance_relative_config=True)
-    # app.config.from_mapping(
-    #     SECRET_KEY='dev',
-    #     # SQLALCHEMY_DATABASE_URI='postgres://postgres:mysecretpassword@localhost:5432/identity-service'
-    # )
     if test_config is None:
         app.config.from_pyfile('config.py', silent=True)
     else:
