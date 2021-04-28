@@ -16,8 +16,8 @@ def login():
     oauth.register(
         name='google',
         server_metadata_url=CONF_URL,
-        client_id=current_app.config['GCP_CLIENT_ID'],
-        client_secret=current_app.config['GCP_CLIENT_SECRET'],
+        client_id=current_app.config['LINKEDIN_CLIENT_ID'],
+        client_secret=current_app.config['LINKEDIN_CLIENT_SECRET'],
         client_kwargs={
             'scope': 'openid email profile'
         }
