@@ -16,8 +16,8 @@ def login():
     oauth.register(
         name='linkedin',
         # server_metadata_url=CONF_URL,
-        client_id='86phkjgu3r8ua8',
-        client_secret='leOnSWwifMfjvNBy',
+        client_id=current_app.config['LINKEDIN_CLIENT_ID'],
+        client_secret=current_app.config['LINKEDIN_CLIENT_SECRET'],
         api_base_url='https://api.linkedin.com/v2/',
         access_token_url='https://www.linkedin.com/oauth/v2/accessToken',
         authorize_url='https://www.linkedin.com/oauth/v2/authorization',

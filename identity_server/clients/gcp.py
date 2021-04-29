@@ -16,8 +16,8 @@ def login():
     oauth.register(
         name='google',
         server_metadata_url=CONF_URL,
-        client_id=current_app.config['LINKEDIN_CLIENT_ID'],
-        client_secret=current_app.config['LINKEDIN_CLIENT_SECRET'],
+        client_id=current_app.config['GCP_CLIENT_ID'],
+        client_secret=current_app.config['GCP_CLIENT_SECRET'],
         client_kwargs={
             'scope': 'openid email profile'
         }
@@ -32,7 +32,7 @@ def auth():
     user = oauth.google.parse_id_token(token)
     userObject = gcp_account_mapper(user)
     saveToken(token,userObject)
-    return redirect('/')
+    return redirect('foobar://success?code='+token['access_token'])
 
 
 # @bp.route('/logout')
