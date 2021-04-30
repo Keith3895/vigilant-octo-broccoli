@@ -16,6 +16,19 @@ def gcp_account_mapper(gcp_user):
         db.session.commit()
     return user
 
+def facebook_account_mapper(facebook):
+    user = User.query.filter_by(email=facebook.email).first()
+    if not user:
+        user = User(
+            username=facebook.email,
+            email=facebook.email,
+            full_name=facebook.name,
+            first_name=facebook.given_name,
+            last_name=facebook.family_name
+        )
+        db.session.add(user)
+        db.session.commit()
+    return user
 
 def saveToken(token, user):
     if 'id_token' in token:
