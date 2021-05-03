@@ -42,9 +42,10 @@ def create_app(test_config=None):
     app.register_blueprint(routes.bp)
 
 
-    from .clients import gcp,linkedin
+    from .clients import gcp,linkedin,facebook
     app.register_blueprint(gcp.bp)
     app.register_blueprint(linkedin.bp)
+    app.register_blueprint(facebook.bp)
     @app.route('/hello')
     def hello():
         return 'Hello, World!'
