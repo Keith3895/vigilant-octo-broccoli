@@ -11,7 +11,9 @@ import json
 bp = Blueprint(__name__, 'home')
 
 
-def current_user():
+def current_user(param=None):
+    if(param):
+        return User.query.get(param)
     if 'id' in session:
         uid = session['id']
         return User.query.get(uid)
@@ -22,29 +24,29 @@ def split_by_crlf(s):
     return [v for v in s.splitlines() if v]
 
 
-# @bp.route('/', methods=('GET', 'POST'))
-# def home():
-#     if request.method == 'POST':
-#         username = request.form.get('username')
-#         user = User.query.filter_by(username=username).first()
-#         # compare hashes
-#         if not user:
-#             user = User(username=username)
-#             db.session.add(user)
-#             db.session.commit()
-#         session['id'] = user.id
-#         # if user is not just to log in, but need to head back to the auth page, then go for it
-#         next_page = request.args.get('next')
-#         if next_page:
-#             return redirect(next_page)
-#         return redirect('/')
-#     user = current_user()
-#     if user:
-#         clients = OAuth2Client.query.filter_by(user_id=user.id).all()
-#     else:
-#         clients = []
+@bp.route('/', methods=('GET', 'POST'))
+def home():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        user = User.query.filter_by(username=username).first()
+        # compare hashes
+        if not user:
+            user = User(username=username)
+            db.session.add(user)
+            db.session.commit()
+        session['id'] = user.id
+        # if user is not just to log in, but need to head back to the auth page, then go for it
+        next_page = request.args.get('next')
+        if next_page:
+            return redirect(next_page)
+        return redirect('/')
+    user = current_user()
+    if user:
+        clients = OAuth2Client.query.filter_by(user_id=user.id).all()
+    else:
+        clients = []
 
-#     return render_template('home.html', user=user, clients=clients)
+    return render_template('home.html', user=user, clients=clients)
 
 
 @bp.route('/logout')
@@ -93,7 +95,12 @@ def create_client():
 
 @bp.route('/oauth/authorize', methods=['GET', 'POST'])
 def authorize():
-    user = current_user()
+    redirectFlag = False
+    if(request.args.get('user')):
+        redirectFlag = True
+        user = current_user(request.args.get('user'))
+    else:
+        user = current_user()
     # if user log status is not true (Auth server), then to log it in
     if not user:
         return redirect(url_for('identity_server.provider.routes.home', next=request.url))
@@ -102,7 +109,10 @@ def authorize():
             grant = authorization.validate_consent_request(end_user=user)
         except OAuth2Error as error:
             return error.error
-        return render_template('authorize.html', user=user, grant=grant)
+        if(redirectFlag == False):
+            return render_template('authorize.html', user=user, grant=grant)
+        else:
+            return authorization.create_authorization_response(grant_user=user)
     if not user and 'username' in request.form:
         username = request.form.get('username')
         user = User.query.filter_by(username=username).first()
@@ -139,7 +149,8 @@ def register():
             if 'full_name' in user_request:
                 full_name = user_request['full_name']
             else:
-                full_name = user_request['first_name'] +" "+user_request['last_name']
+                full_name = user_request['first_name'] + \
+                    " "+user_request['last_name']
             user = User(
                 username=user_request['email'],
                 email=user_request['email'],
@@ -152,28 +163,3 @@ def register():
             db.session.commit()
         # Change this to a success message.
         return jsonify(user=user.email), 201
-
-
-@bp.route('/oauth/login', methods=['POST'])
-def login():
-    if(request.method == 'GET'):
-        user = current_user()
-        if user:
-            clients = OAuth2Client.query.filter_by(user_id=user.id).all()
-        else:
-            clients = []
-        return render_template('home.html', user=user, clients=clients)
-
-    
-    user_request = request.get_json()
-    user = User.query.filter_by(username=user_request['email']).first()
-    # compare hashes
-    if not user or not user.check_password(user_request['password']):
-        return jsonify(message="fail"), 403
-    else:
-        session['id'] = user.id
-        next_page = request.args.get('next')
-        if next_page:
-            return redirect(next_page)
-        # return redirect('/')
-        return jsonify(message="success"), 201
