@@ -40,7 +40,9 @@ def auth():
     email = email_resp.json()
     userObject = linkedin_account_mapper(user, email)
     saveToken(token, userObject)
-    return redirect('/')
+    return redirect(url_for('identity_server.provider.routes.authorize', user=userObject.id,
+                            response_type='code', client_id='D23YEFyX9HZxhj0G3uUKerJZ', scope='profile'
+                            ))
 
 
 # @bp.route('/logout')

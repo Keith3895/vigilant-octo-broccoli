@@ -1,7 +1,9 @@
-from flask import Flask, url_for, session, g, Blueprint, current_app
+from flask import Flask, url_for, session, g, Blueprint, current_app, request
 from flask import render_template, redirect
 from authlib.integrations.flask_client import OAuth
 from .utils import gcp_account_mapper, saveToken
+from identity_server.provider.oauth2 import authorization
+from authlib.oauth2 import OAuth2Request
 
 bp = Blueprint(__name__, 'client', url_prefix='/auth/gcp/')
 
@@ -31,8 +33,11 @@ def auth():
     token = oauth.google.authorize_access_token()
     user = oauth.google.parse_id_token(token)
     userObject = gcp_account_mapper(user)
-    saveToken(token,userObject)
-    return redirect('foobar://success?code='+token['access_token'])
+    saveToken(token, userObject)
+    return redirect(url_for('identity_server.provider.routes.authorize', user=userObject.id,
+                            response_type='code', client_id='D23YEFyX9HZxhj0G3uUKerJZ', scope='profile'
+                            ))
+    # return redirect('foobar://success?code='+token['access_token'])
 
 
 # @bp.route('/logout')

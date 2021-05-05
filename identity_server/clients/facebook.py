@@ -1,7 +1,7 @@
 from flask import Flask, url_for, session, g, Blueprint, current_app
 from flask import render_template, redirect
 from authlib.integrations.flask_client import OAuth
-from .utils import saveToken, linkedin_account_mapper
+from .utils import saveToken, facebook_account_mapper
 
 bp = Blueprint(__name__, 'client', url_prefix='/auth/facebook/')
 
@@ -41,7 +41,9 @@ def auth():
     print(user)
     userObject = facebook_account_mapper(user)
     saveToken(token, userObject)
-    return redirect('/')
+    return redirect(url_for('identity_server.provider.routes.authorize', user=userObject.id,
+                            response_type='code', client_id='D23YEFyX9HZxhj0G3uUKerJZ', scope='profile'
+                            ))
 
 
 # @bp.route('/logout')
