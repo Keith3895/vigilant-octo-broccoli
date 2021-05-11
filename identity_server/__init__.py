@@ -2,7 +2,8 @@ import os
 import logging
 from logging.handlers import RotatingFileHandler
 
-from flask import Flask
+from flask import Flask,session
+from flask_session import Session,SqlAlchemySessionInterface
 from .models import db
 
 def setLogger():
@@ -32,11 +33,21 @@ def create_app(test_config=None):
     except OSError:
         pass
     app.secret_key = 'any random string'
-    
+    app.config['SESSION_TYPE'] = 'sqlalchemy'
+    app.config['SESSION_SQLALCHEMY_TABLE'] = 'sessions'
+    app.config['SESSION_KEY_PREFIX'] = ''
+    app.config['SESSION_SQLALCHEMY'] = db
+    # Session(app)
     @app.before_first_request
     def create_tables():
+        # session.app.session_interface.db.create_all()
         db.create_all()
     db.init_app(app)
+    
+    
+    # session = 
+    
+    SqlAlchemySessionInterface(app=app,db=db,table='session',key_prefix='')
     from .provider import oauth2, routes
     oauth2.config_oauth(app)
     app.register_blueprint(routes.bp)

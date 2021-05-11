@@ -13,6 +13,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 # db = get_db()
 db = SQLAlchemy()
 
+
 class User(db.Model):
     __tablename__ = 'user'
     id = db.Column(db.Integer, primary_key=True)
@@ -40,6 +41,7 @@ class User(db.Model):
     # def __repr__(self):
     #     return '<User %r>' % self.username
 
+
 class OAuth2Client(db.Model, OAuth2ClientMixin):
     __tablename__ = 'oauth2_client'
 
@@ -47,6 +49,7 @@ class OAuth2Client(db.Model, OAuth2ClientMixin):
     user_id = db.Column(
         db.Integer, db.ForeignKey('user.id', ondelete='CASCADE'))
     user = db.relationship('User')
+
 
 class OAuth2AuthorizationCode(db.Model, OAuth2AuthorizationCodeMixin):
     __tablename__ = 'oauth2_code'
@@ -71,3 +74,23 @@ class OAuth2Token(db.Model, OAuth2TokenMixin):
             return False
         expires_at = self.issued_at + self.expires_in * 2
         return expires_at >= time.time()
+
+class OAuth2ProvidersMaster(db.Model):
+    __tablename__ = 'providers_master'
+    id = db.Column(db.Integer, primary_key=True)
+    providerName = db.Column(db.String(250), nullable=False)
+
+
+class OAuth2Providers(db.Model):
+    __tablename__ = 'providers'
+
+    id = db.Column(db.Integer, primary_key=True)
+    local_client_id = db.Column(db.Integer, db.ForeignKey('oauth2_client.id', ondelete='CASCADE'))
+    # provider_id = db.Column(db.Integer, primary_key=True)
+    client_id = db.Column(db.String(250), nullable=False)
+    client_secret = db.Column(db.String(450), nullable=False)
+    providerName = db.relationship('OAuth2ProvidersMaster')
+    client = db.relationship('OAuth2Client')
+    provider_id = db.Column(
+        db.Integer, db.ForeignKey('providers_master.id', ondelete='CASCADE'))
+
