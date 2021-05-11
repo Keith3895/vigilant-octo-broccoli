@@ -1,0 +1,70 @@
+//// -- LEVEL 1
+//// -- Tables and References
+
+// Creating tables
+Table users as U {
+  id int [pk, increment] // auto-increment
+  full_name varchar
+  first_name varchar
+  last_name varchar
+  email varchar
+  profile_picture varchar
+  created_at timestamp
+  country_code int
+}
+
+Table oauth2_client as cli{
+  id int [pk,not null,increment]
+  client_id varchar [unique]
+  client_secret varchar
+  client_id_issued_at int
+  client_secret_issued_at int
+  client_metadata text
+  user_id int [ref: < U.id]
+
+  
+}
+
+Table oauth2_code{
+  code varchar [unique]
+  client_id varchar 
+  redirect_uri text
+  response_type text
+  scope text
+  nonce text
+  auth_time int
+  code_challenge text
+  code_challenge_method varchar
+  id int [pk]
+  user_id int [ref: < U.id]
+}
+Table oauth2_token{
+  client_id varchar
+  token_type varchar
+  access_token varchar [unique]
+  refresh_token varchar
+  scope text
+  revoked boolean
+  issued_at integer [not null]
+  expires_in integer [not null]
+  id integer [pk, not null]
+  user_id integer [ref: < U.id]
+}
+
+Table providers{
+  id integer
+  provider_id integer
+  client_id varchar
+  client_secret varchar
+}
+Table providers_master{
+  id integer
+  provider_name varchar
+}
+Ref: "oauth2_code"."client_id" < "oauth2_client"."client_id"
+
+Ref: "oauth2_token"."client_id" < "oauth2_client"."client_id"
+
+Ref: "providers_master"."id" < "providers"."provider_id"
+
+Ref: "providers"."client_id" < "oauth2_client"."id"
