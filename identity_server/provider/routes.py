@@ -137,7 +137,7 @@ def revoke_token():
 @require_oauth('profile')
 def api_me():
     user = current_token.user
-    return jsonify(id=user.id, username=user.username)
+    return jsonify(id=user.id, email=user.username, name=user.full_name)
 
 
 @bp.route('/oauth/register', methods=['POST'])
